@@ -1,6 +1,6 @@
 {
   "name": "webscrape",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Scrape web pages. Uses and returns promises",
   "main": "dist/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/masotime/web-scraper.git"
-  },  
+  },
   "keywords": [
     "scraping",
     "web"
