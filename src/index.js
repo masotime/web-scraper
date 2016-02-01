@@ -3,15 +3,17 @@ import fs from 'fs';
 import Promise from 'bluebird';
 import zlib from 'zlib';
 
-import { betterRequest, constructOptionsWithJar, constructError, constructResult, determineFilename } from './lib';
+import lib from './lib';
+
+const { betterRequest, constructOptionsWithJar, constructError, constructResult, determineFilename } = lib;
 
 // creates a closure instance of a scraper
-function factory() {
+function Scraper() {
 
 	const jar = request.jar();
-	const constructOptions = (uri, { headers, query, body} ) => constructOptionsWithJar(uri, { headers, query, body, jar});
+	const constructOptions = (uri, { headers, query, body } = {} ) => constructOptionsWithJar(uri, { headers, query, body, jar });
 
-	const get = (uri, { headers, query }) => new Promise( (resolve, reject) => {
+	const get = (uri, { headers, query } = {} ) => new Promise( (resolve, reject) => {
 		const options = constructOptions(uri, { headers, query });
 		return betterRequest(options, (err, resp, body) => {
 			if (err) {
@@ -19,13 +21,13 @@ function factory() {
 			} else if (resp.statusCode !== 200) {
 				return reject(constructError(options, resp, body));
 			} else {
-				return resolve(constructResult(body));
+				return resolve(constructResult(resp, body));
 			}
 		});
 
 	});
 
-	const post = (uri, { headers, query, body }) => new Promise( (resolve, reject) => {
+	const post = (uri, { headers, query, body } = {} ) => new Promise( (resolve, reject) => {
 		const options = constructOptions({ headers, query, body });
 		return betterRequest(options, function(err, resp, body) {
 			if (err) {
@@ -33,18 +35,18 @@ function factory() {
 			} else if (resp.statusCode !== 200) {
 				return reject(constructError(options, resp, body));
 			} else {
-				return resolve(constructResult(body));
+				return resolve(constructResult(resp, body));
 			}
 		});
 	});
 
 	// MAYDO: A download may be the response from a POST?
-	const download = function(uri, { headers, query, filename }) {
+	const download = function(uri, { headers, query, filename } = {}) {
 
 		return determineFilename(uri, filename).then( downloadpath => {
 			console.log(`DOWNLOAD ${uri} to ${downloadpath}`);
 
-			const options = constructOptions({ headers, query });
+			const options = constructOptions(uri, { headers, query });
 			const writeStream = fs.createWriteStream(downloadpath);
 			const req = request(options);
 
@@ -84,7 +86,7 @@ function factory() {
 
 	};	
 
-	return { get, post };
+	return { get, post, download };
 }
 
-module.exports = SessionFactory;
+export default Scraper;

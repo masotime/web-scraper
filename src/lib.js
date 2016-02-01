@@ -77,8 +77,10 @@ function constructError(options, resp, body) {
 function constructResult(resp, body) {
 	const result = { body };
 
+	const contentType = resp.headers['content-type'];
+	const mimeType = contentType && contentType.split(';')[0];
 	// augment the result
-	switch (resp.mimeType) {
+	switch (mimeType) {
 		case 'text/html': result.$ = cheerio.load(body, { lowerCaseTags: true }); break;
 		case 'application/json': result.json = JSON.parse(body.replace(UNICODE_HEADER, (m, n) => String.fromCharCode(parseInt(n,16))));
 	}
@@ -116,16 +118,13 @@ function determineFilename(uri, filename) {
 		} else if (filename) {
 			// if the filename is actually a folder that already exists, then download to the folder using the baseFilename
 			fs.stat(filename, (err, result) => {
-				var finalValue;
 				try {
 					if (err || !result.isDirectory()) {
-						// just carry on using the filename
-						finalValue = filename;
+						return resolve(filename); // just carry on using the filename
 					} else {
 						// we append the basefilename to the directory
-						finalValue = path.join(filename, baseFilename);
+						return resolve(path.join(filename, baseFilename));
 					}
-					return resolve(finalValue);
 				} catch (e) {
 					return reject(e);
 				}

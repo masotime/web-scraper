@@ -4,7 +4,9 @@
   "description": "Scrape web pages. Uses and returns promises",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "babel --presets es2015,stage-0 -d dist/ src/",
+    "prepublish": "npm run compile",
+    "test": "mocha --compilers js:babel-core/register  --require babel-polyfill --timeout 120000"
   },
   "keywords": [
     "scraping",
@@ -25,6 +27,7 @@
     "babel-plugin-transform-runtime": "^6.4.3",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-stage-0": "^6.3.13",
+    "mkdirp": "^0.5.1",
     "mocha": "^2.4.5"
   }
 }
