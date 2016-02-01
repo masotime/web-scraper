@@ -8,6 +8,10 @@
     "prepublish": "npm run compile",
     "test": "mocha --compilers js:babel-core/register  --require babel-polyfill --timeout 120000"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masotime/web-scraper.git"
+  },  
   "keywords": [
     "scraping",
     "web"
