@@ -89,4 +89,4 @@ function Scraper() {
 	return { get, post, download };
 }
 
-export default Scraper;
+export Scraper;
