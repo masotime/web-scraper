@@ -30,7 +30,7 @@ var scraper = webscrape.default();
 
 In addition, there is also
 
-* `scrapper.download(...)`
+* `scraper.download(...)`
 
 All invocations return **A+ Promises**. This works well with `async/await` in ES7.
 
@@ -39,6 +39,10 @@ All invocations return **A+ Promises**. This works well with `async/await` in ES
    * For `.get`, `{ headers, query }` is supported
    * For `.post`, `{ headers, query, body }` is supported.
    * For `.download`, `{ headers, query, filename }` is supported.
+
+e.g. `scraper.get("http://www.google.com/search", { query: { q: 'pineapples' } });`
+
+### parameters
 
 * `headers` should be a simple JavaScript object representing the HTTP headers you want to send.
 * `query` is also a JavaScript object of the query params you want to send.
@@ -53,23 +57,27 @@ Apart from the `download` API, the response will be a "result" object with one o
 * If the response is of type `application/json`, then there will be a `.json` property which is essentially the parsed JSON object.
 * If the response is of type `text/html`, there will be a `.$` which, via the [cheerio][3] library, provides jQuery-like selector functionality.
 
-Some simple examples (ES6/2015):
+## examples (ES6/2015):
 
 ```
 import Scraper from 'webscrape';
 
 const scraper = Scraper();
 
-const result = await scraper.get('https://www.google.com');
-console.log(result.body); // dumps the raw HTML
-console.log(result.$('title').text()); // returns "Google"
+async function main() {
+	const result = await scraper.get('https://www.google.com');
+	console.log(result.body); // dumps the raw HTML
+	console.log(result.$('title').text()); // returns "Google"
+	
+	const query = {
+		'address': '1600 Amphitheatre Parkway, Mountain View, CA',
+		'sensor': 'false'
+	};
+	const result2 = await scraper.get('http://maps.googleapis.com/maps/api/geocode/json', { query })
+	console.log(result2.json); // gets JSON information about the Google's Headquarters
+}
 
-const query = {
-	'address': '1600 Amphitheatre Parkway, Mountain View, CA',
-	'sensor': 'false'
-};
-const result2 = await scraper.get('http://maps.googleapis.com/maps/api/geocode/json', { query })
-console.log(result2.json); // gets JSON information about the Google's Headquarters
+await main();
 
 ```
 
