@@ -2,11 +2,13 @@
 
 NOTE: I wanted `scrape`, `scraper`, `webscraper` or `web-scraper` but people are squatting on the name in npm...
 
-This replaces the older [qscraper][1] library with a more efficient API. This module is currently for Node only, it is _not_ a universal or client-side module.
+`webscrape` is a convenience module that grabs stuff over HTTP and provides automatic parsing into JSON or a convenient jQuery selector to allow you to quickly manipulate the result. In addition, it also supports an endpoint to download files into your filesystem, either with the same name remotely, or to a specified folder / filename.
+
+`webscrape` is [Promise/A+][promiseA+] based via [bluebird][4], and as a result also works well with ES7's `async/await` syntax.
 
 ## usage
 
-This module uses default exports. In ES6, you would do
+This module uses **default exports**. In ES6, you would do
 
 ```
 import Scraper from 'webscrape';
@@ -25,16 +27,16 @@ var scraper = webscrape.default();
 
 `webscrape` uses a standard syntax for all invocations. Currently it supports the 2 basic HTTP methods, GET and POST, and are invoked via
 
-* `scraper.get(...)`
-* `scraper.post(...)`
+* `scraper.get(url, options)`
+* `scraper.post(url, options)`
 
 In addition, there is also
 
-* `scraper.download(...)`
+* `scraper.download(url, options)`
 
 All invocations return **A+ Promises**. This works well with `async/await` in ES7.
 
-1. The first argument is _always_ the URL you want to scrape
+1. The first argument `url` is _always_ the URL you want to scrape
 2. The second argument is an object that contains additional options regarding the HTTP request you want to make.
    * For `.get`, `{ headers, query }` is supported
    * For `.post`, `{ headers, query, body }` is supported.
@@ -83,6 +85,10 @@ await main();
 
 Please refer to [test.js][2] for more ES6 examples.
 
+P.S. This replaces the older [qscraper][1] library with a more efficient API. This module is currently for Node only, it is _not_ a universal or client-side module.
+
 [1]: https://www.npmjs.com/package/qscraper
 [2]: test.js
 [3]: https://www.npmjs.com/package/cheerio
+[4]: https://www.npmjs.com/package/bluebird
+[promiseA+]: https://promisesaplus.com
