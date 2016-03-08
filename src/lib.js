@@ -103,6 +103,7 @@ function constructOptionsWithJar(uri, { headers, query, body, jar, method = 'GET
 			.filter(pair => pair.key === 'content-type');
 		if (contentTypeSet.length === 1 && contentTypeSet[0].value === 'application/json') {
 			options.json = true;
+			options.body = body;
 		} else {
 			options.form = body;	
 		}
