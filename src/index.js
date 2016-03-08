@@ -11,10 +11,10 @@ const { betterRequest, constructOptionsWithJar, constructError, constructResult,
 function Scraper() {
 
 	const jar = request.jar();
-	const constructOptions = (uri, { headers, query, body } = {} ) => constructOptionsWithJar(uri, { headers, query, body, jar });
+	const constructOptions = (uri, { headers, query, body, method } = {} ) => constructOptionsWithJar(uri, { headers, query, body, jar, method });
 
 	const get = (uri, { headers, query } = {} ) => new Promise( (resolve, reject) => {
-		const options = constructOptions(uri, { headers, query });
+		const options = constructOptions(uri, { headers, query, method: 'GET' });
 		return betterRequest(options, (err, resp, body) => {
 			if (err) {
 				return reject(err);
@@ -28,7 +28,7 @@ function Scraper() {
 	});
 
 	const post = (uri, { headers, query, body } = {} ) => new Promise( (resolve, reject) => {
-		const options = constructOptions(uri, { headers, query, body });
+		const options = constructOptions(uri, { headers, query, body, method: 'POST' });
 		return betterRequest(options, function(err, resp, body) {
 			if (err) {
 				return reject(err);

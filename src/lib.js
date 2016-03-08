@@ -88,8 +88,8 @@ function constructResult(resp, body) {
 	return result;
 }
 
-function constructOptionsWithJar(uri, { headers, query, body, jar }) {
-	const options = { uri, jar };
+function constructOptionsWithJar(uri, { headers, query, body, jar, method = 'GET' }) {
+	const options = { uri, jar, method };
 
 	options.headers = Object.assign({}, BASE_OPTIONS, headers);
 	if (query !== undefined) {
