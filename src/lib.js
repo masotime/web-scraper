@@ -99,9 +99,9 @@ function constructOptionsWithJar(uri, { headers, query, body, jar, method = 'GET
 	// TODO: this logic may change later, since it is not obvious
 	if (body !== undefined) {
 		const contentTypeSet = Object.keys(options.headers)
-			.map(key => key.toLowerCase())
-			.filter(key => key === 'content-type');
-		if (contentTypeSet.length === 1 && contentTypeSet[0] === 'application/json') {
+			.map(key => ({ key: key.toLowerCase(), value: options.headers[key] }))
+			.filter(pair => pair.key === 'content-type');
+		if (contentTypeSet.length === 1 && contentTypeSet[0].value === 'application/json') {
 			options.json = true;
 		} else {
 			options.form = body;	
