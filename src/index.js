@@ -28,7 +28,7 @@ function Scraper() {
 	});
 
 	const post = (uri, { headers, query, body } = {} ) => new Promise( (resolve, reject) => {
-		const options = constructOptions({ headers, query, body });
+		const options = constructOptions(uri, { headers, query, body });
 		return betterRequest(options, function(err, resp, body) {
 			if (err) {
 				return reject(err);
