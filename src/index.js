@@ -7,6 +7,11 @@ import lib from './lib';
 
 const { betterRequest, constructOptionsWithJar, constructError, constructResult, determineFilename } = lib;
 
+function isOK(statusCode) {
+	const str = statusCode && statusCode.toString();
+	return str && str.length === 3 && str.indexOf('2') === 0;
+}
+
 // creates a closure instance of a scraper
 function Scraper() {
 
@@ -18,7 +23,7 @@ function Scraper() {
 		return betterRequest(options, (err, resp, body) => {
 			if (err) {
 				return reject(err);
-			} else if (resp.statusCode !== 200) {
+			} else if (!isOK(resp.statusCode)) {
 				return reject(constructError(options, resp, body));
 			} else {
 				return resolve(constructResult(resp, body));
@@ -32,7 +37,7 @@ function Scraper() {
 		return betterRequest(options, function(err, resp, body) {
 			if (err) {
 				return reject(err);
-			} else if (resp.statusCode !== 200) {
+			} else if (!isOK(resp.statusCode)) {
 				return reject(constructError(options, resp, body));
 			} else {
 				return resolve(constructResult(resp, body));
@@ -56,7 +61,8 @@ function Scraper() {
 				req.on('response', function(res) {
 					var encoding = res.headers['content-encoding'];
 
-					if (res.statusCode !== 200) {
+					// TODO: I need to support more status codes
+					if (!isOK(res.statusCode)) {
 						return reject(constructError(options, res, res.body));
 					} else {
 						if (encoding === 'gzip') {
