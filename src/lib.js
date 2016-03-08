@@ -91,13 +91,21 @@ function constructResult(resp, body) {
 function constructOptionsWithJar(uri, { headers, query, body, jar, method = 'GET' }) {
 	const options = { uri, jar, method };
 
-	options.headers = Object.assign({}, BASE_OPTIONS, headers);
+	options.headers = Object.assign({}, BASE_OPTIONS.headers, headers);
 	if (query !== undefined) {
 		options.qs = query
 	}
 
+	// TODO: this logic may change later, since it is not obvious
 	if (body !== undefined) {
-		options.form = body;
+		const contentTypeSet = Object.keys(options.headers)
+			.map(key => key.toLowerCase())
+			.filter(key => key === 'content-type');
+		if (contentTypeSet.length === 1 && contentTypeSet[0] === 'application/json') {
+			options.json = true;
+		} else {
+			options.form = body;	
+		}
 	}
 
 	return options;
