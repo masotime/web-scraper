@@ -16,10 +16,14 @@ function isOK(statusCode) {
 function Scraper() {
 
 	const jar = request.jar();
-	const constructOptions = (uri, { headers, query, body, method } = {} ) => constructOptionsWithJar(uri, { headers, query, body, jar, method });
+	const constructOptions = (uri, { 
+		headers, query, body, method, agentOptions 
+	} = {} ) => constructOptionsWithJar(uri, { 
+		headers, query, body, method, agentOptions, jar
+	});
 
-	const get = (uri, { headers, query } = {} ) => new Promise( (resolve, reject) => {
-		const options = constructOptions(uri, { headers, query, method: 'GET' });
+	const get = (uri, { headers, query, agentOptions } = {} ) => new Promise( (resolve, reject) => {
+		const options = constructOptions(uri, { headers, query, agentOptions, method: 'GET' });
 		return betterRequest(options, (err, resp, body) => {
 			if (err) {
 				return reject(err);
@@ -32,8 +36,8 @@ function Scraper() {
 
 	});
 
-	const post = (uri, { headers, query, body } = {} ) => new Promise( (resolve, reject) => {
-		const options = constructOptions(uri, { headers, query, body, method: 'POST' });
+	const post = (uri, { headers, query, body, agentOptions } = {} ) => new Promise( (resolve, reject) => {
+		const options = constructOptions(uri, { headers, query, body, agentOptions, method: 'POST' });
 		return betterRequest(options, function(err, resp, body) {
 			if (err) {
 				return reject(err);
@@ -46,12 +50,12 @@ function Scraper() {
 	});
 
 	// MAYDO: A download may be the response from a POST?
-	const download = function(uri, { headers, query, filename } = {}) {
+	const download = function(uri, { headers, query, agentOptions, filename } = {}) {
 
 		return determineFilename(uri, filename).then( downloadpath => {
 			console.log(`DOWNLOAD ${uri} to ${downloadpath}`);
 
-			const options = constructOptions(uri, { headers, query });
+			const options = constructOptions(uri, { headers, query, agentOptions });
 			const writeStream = fs.createWriteStream(downloadpath);
 			const req = request(options);
 

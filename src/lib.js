@@ -46,6 +46,14 @@ function betterRequest(options, callback) {
 					console.log('Content is deflated');
 					zlib.inflate(buffer, (err, decoded) =>  callback(err, res, decoded && decoded.toString()));
 				} else {
+					// very special case, although this should really be a 303.
+					if (res.statusCode === 302) {
+						const err = new Error(`Unexpected Redirect to ${res.headers.location}`);
+						err.name = 'UnexpectedRedirectError';
+						err.location = res.headers.location;
+						return callback(err);
+					}
+
 					// manually handle 303... bah
 					if (res.statusCode === 303) {
 						options.uri = res.headers.location;
@@ -88,12 +96,16 @@ function constructResult(resp, body) {
 	return result;
 }
 
-function constructOptionsWithJar(uri, { headers, query, body, jar, method = 'GET' }) {
+function constructOptionsWithJar(uri, { headers, query, body, jar, agentOptions, method = 'GET' }) {
 	const options = { uri, jar, method };
 
 	options.headers = Object.assign({}, BASE_OPTIONS.headers, headers);
 	if (query !== undefined) {
 		options.qs = query
+	}
+
+	if (agentOptions) {
+		options.agentOptions = agentOptions;
 	}
 
 	// TODO: this logic may change later, since it is not obvious
