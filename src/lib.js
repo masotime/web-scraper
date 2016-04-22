@@ -113,8 +113,10 @@ function constructOptionsWithJar(uri, { headers, query, body, jar, agentOptions,
 		const contentTypeSet = Object.keys(options.headers)
 			.map(key => ({ key: key.toLowerCase(), value: options.headers[key] }))
 			.filter(pair => pair.key === 'content-type');
-		if (contentTypeSet.length === 1 && contentTypeSet[0].value === 'application/json') {
-			options.json = true;
+		if (contentTypeSet.length === 1) {
+			// since there is a content type, we assume this is not a HTTP form POST.
+			// NOTE: as a result, the user must do encoding manually.
+			options.json = contentTypeSet[0].toLowerCase().startsWith('application/json');
 			options.body = body;
 		} else {
 			options.form = body;	
