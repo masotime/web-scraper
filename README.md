@@ -67,19 +67,27 @@ import Scraper from 'webscrape';
 const scraper = Scraper();
 
 async function main() {
-	const result = await scraper.get('https://www.google.com');
-	console.log(result.body); // dumps the raw HTML
-	console.log(result.$('title').text()); // returns "Google"
-	
-	const query = {
-		'address': '1600 Amphitheatre Parkway, Mountain View, CA',
-		'sensor': 'false'
-	};
-	const result2 = await scraper.get('http://maps.googleapis.com/maps/api/geocode/json', { query })
-	console.log(result2.json); // gets JSON information about the Google's Headquarters
+    const result = await scraper.get('https://www.google.com');
+    console.log(result.body); // dumps the raw HTML
+    console.log(result.$('title').text()); // returns "Google"
+
+    const query = {
+        'address': '1600 Amphitheatre Parkway, Mountain View, CA',
+        'sensor': 'false'
+    };
+    const result2 = await scraper.get('http://maps.googleapis.com/maps/api/geocode/json', { query })
+    console.log(result2.json); // gets JSON information about the Google's Headquarters
 }
 
-await main();
+async function execute() {
+	try {
+		await main();
+	} catch (e) {
+		console.error(e.stack || e);
+	}
+}
+
+execute();
 
 ```
 
