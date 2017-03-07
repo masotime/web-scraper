@@ -1,6 +1,6 @@
 # webscrape
 
-NOTE: I wanted `scrape`, `scraper`, `webscraper` or `web-scraper` but people are squatting on the name in npm...
+[![npm downloads][downloads-image]][downloads-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status][coverage-image]][coverage-url]
 
 `webscrape` is a convenience module that grabs stuff over HTTP and provides automatic parsing into JSON or a convenient jQuery selector to allow you to quickly manipulate the result. In addition, it also supports an endpoint to download files into your filesystem, either with the same name remotely, or to a specified folder / filename.
 
@@ -100,3 +100,12 @@ P.S. This replaces the older [qscraper][1] library with a more efficient API. Th
 [3]: https://www.npmjs.com/package/cheerio
 [4]: https://www.npmjs.com/package/bluebird
 [promiseA+]: https://promisesaplus.com
+
+[downloads-image]: https://img.shields.io/npm/dm/webscrape.svg?style=flat-square
+[downloads-url]: https://www.npmjs.com/package/webscrape
+[travis-image]: https://travis-ci.org/masotime/webscrape.svg?branch=master
+[travis-url]: https://travis-ci.org/masotime/webscrape
+[daviddm-image]: https://david-dm.org/masotime/webscrape.svg?theme=shields.io
+[daviddm-url]: https://david-dm.org/masotime/webscrape
+[coverage-image]: https://coveralls.io/repos/github/masotime/webscrape/badge.svg?branch=master
+[coverage-url]: https://coveralls.io/github/masotime/webscrape?branch=master
