@@ -133,6 +133,13 @@ describe('Scraper', () => {
 			assert.ok(contents.includes('nonsense'));
 		}));
 
+		it('should be able to read headers from the response', asyncMocha( async () => {
+			const scraper = Scraper();
+			const { headers } = await scraper.get('https://www.instagram.com');
+
+			assert.ok(headers['set-cookie']);
+		}));
+
 		afterEach( async () => await deleteIfExists(tempfile));
 
 	});

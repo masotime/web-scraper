@@ -83,7 +83,10 @@ function constructError(options, resp, body) {
 
 // TODO: This could throw errors. Deal with it.
 function constructResult(resp, body) {
-	const result = { body };
+	const result = { 
+		body,
+		headers: resp.headers
+	};
 
 	const contentType = resp.headers['content-type'];
 	const mimeType = contentType && contentType.split(';')[0];
