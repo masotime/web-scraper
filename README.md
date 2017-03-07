@@ -55,7 +55,7 @@ e.g. `scraper.get("http://www.google.com/search", { query: { q: 'pineapples' } }
 
 Apart from the `download` API, the response will be a "result" object with one or more additional properties
 
-* It will always have a `.body` property representing the entirety of the response body.
+* It will always have a `.body` property representing the entirety of the response body, along with `.headers`
 * If the response is of type `application/json`, then there will be a `.json` property which is essentially the parsed JSON object.
 * If the response is of type `text/html`, there will be a `.$` which, via the [cheerio][3] library, provides jQuery-like selector functionality.
 
