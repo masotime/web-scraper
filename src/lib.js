@@ -6,6 +6,8 @@ import url from 'url';
 import Promise from 'bluebird';
 import zlib from 'zlib';
 
+import { debuglog } from 'util';
+
 // base options
 const BASE_OPTIONS = {
 	headers: {
@@ -40,10 +42,10 @@ function betterRequest(options, callback) {
 
 			try {
 				if (encoding === 'gzip') {
-					console.log('Content is gzipped');
+					debuglog('Content is gzipped');
 					zlib.gunzip(buffer, (err, decoded) => callback(err, res, decoded && decoded.toString()));
 				} else if (encoding === 'deflate') {
-					console.log('Content is deflated');
+					debuglog('Content is deflated');
 					zlib.inflate(buffer, (err, decoded) =>  callback(err, res, decoded && decoded.toString()));
 				} else {
 					// very special case, although this should really be a 303.
@@ -83,7 +85,7 @@ function constructError(options, resp, body) {
 
 // TODO: This could throw errors. Deal with it.
 function constructResult(resp, body) {
-	const result = { 
+	const result = {
 		body,
 		headers: resp.headers
 	};
@@ -99,12 +101,15 @@ function constructResult(resp, body) {
 	return result;
 }
 
-function constructOptionsWithJar(uri, { headers, query, body, jar, agentOptions, method = 'GET' }) {
+function constructOptionsWithJar(uri, { headers, query, body, jar, agentOptions, method = 'GET', indicies = true }) {
 	const options = { uri, jar, method };
 
 	options.headers = Object.assign({}, BASE_OPTIONS.headers, headers);
 	if (query !== undefined) {
-		options.qs = query
+		options.qs = query;
+		options.qsStringifyOptions = {
+			arrayFormat: indicies ? 'indicies' : 'repeat' // the documentation on this is terrible
+		};
 	}
 
 	if (agentOptions) {
@@ -122,9 +127,11 @@ function constructOptionsWithJar(uri, { headers, query, body, jar, agentOptions,
 			options.json = contentTypeSet[0].value.toLowerCase().startsWith('application/json');
 			options.body = body;
 		} else {
-			options.form = body;	
+			options.form = body;
 		}
 	}
+
+	console.log(JSON.stringify(options, null, 2));
 
 	return options;
 }
@@ -135,7 +142,7 @@ function determineFilename(uri, filename) {
 		try {
 			baseFilename = /[^\/]+$/.exec(url.parse(uri,true).pathname)[0];
 		} catch (err) {
-			console.warn(`WARNING Unable to determine base filename for ${uri}`);
+			debuglog(`WARNING Unable to determine base filename for ${uri}`);
 		}
 
 		// why is this the first condition? because we may need baseFilename if filename is a folder

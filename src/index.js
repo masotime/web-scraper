@@ -4,6 +4,9 @@ import Promise from 'bluebird';
 import zlib from 'zlib';
 
 import lib from './lib';
+import { debuglog } from 'util';
+
+const log = debuglog('webscrape');
 
 const { betterRequest, constructOptionsWithJar, constructError, constructResult, determineFilename } = lib;
 
@@ -16,14 +19,14 @@ function isOK(statusCode) {
 function Scraper() {
 
 	const jar = request.jar();
-	const constructOptions = (uri, { 
-		headers, query, body, method, agentOptions 
-	} = {} ) => constructOptionsWithJar(uri, { 
-		headers, query, body, method, agentOptions, jar
+	const constructOptions = (uri, {
+		headers, query, body, method, agentOptions, indicies
+	} = {} ) => constructOptionsWithJar(uri, {
+		headers, query, body, method, agentOptions, indicies, jar
 	});
 
-	const get = (uri, { headers, query, agentOptions } = {} ) => new Promise( (resolve, reject) => {
-		const options = constructOptions(uri, { headers, query, agentOptions, method: 'GET' });
+	const get = (uri, { headers, query, agentOptions, indicies } = {} ) => new Promise( (resolve, reject) => {
+		const options = constructOptions(uri, { headers, query, agentOptions, indicies, method: 'GET' });
 		return betterRequest(options, (err, resp, body) => {
 			if (err) {
 				return reject(err);
@@ -36,8 +39,8 @@ function Scraper() {
 
 	});
 
-	const post = (uri, { headers, query, body, agentOptions } = {} ) => new Promise( (resolve, reject) => {
-		const options = constructOptions(uri, { headers, query, body, agentOptions, method: 'POST' });
+	const post = (uri, { headers, query, body, agentOptions, indicies } = {} ) => new Promise( (resolve, reject) => {
+		const options = constructOptions(uri, { headers, query, body, agentOptions, indicies, method: 'POST' });
 		return betterRequest(options, function(err, resp, body) {
 			if (err) {
 				return reject(err);
@@ -50,12 +53,12 @@ function Scraper() {
 	});
 
 	// MAYDO: A download may be the response from a POST?
-	const download = function(uri, { headers, query, agentOptions, filename } = {}) {
+	const download = function(uri, { headers, query, agentOptions, filename, indicies } = {}) {
 
 		return determineFilename(uri, filename).then( downloadpath => {
-			console.log(`DOWNLOAD ${uri} to ${downloadpath}`);
+			log(`DOWNLOAD ${uri} to ${downloadpath}`);
 
-			const options = constructOptions(uri, { headers, query, agentOptions });
+			const options = constructOptions(uri, { headers, query, agentOptions, indicies });
 			const writeStream = fs.createWriteStream(downloadpath);
 			const req = request(options);
 
@@ -94,7 +97,7 @@ function Scraper() {
 
 		});
 
-	};	
+	};
 
 	return { get, post, download };
 }

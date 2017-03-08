@@ -36,7 +36,7 @@ describe('Scraper', () => {
 
 	// MAYDO: Transpilation means that the function length cannot be properly tested
 	const apis = [
-		{ name: 'get', length: 2 }, 
+		{ name: 'get', length: 2 },
 		{ name: 'post', length: 2 },
 		{ name: 'download', length: 2}
 	];
@@ -142,6 +142,31 @@ describe('Scraper', () => {
 
 		afterEach( async () => await deleteIfExists(tempfile));
 
+	});
+
+	describe('querystring support', () => {
+		it('should use indices by default for arrays in query', asyncMocha( async () => {
+			const scraper = Scraper();
+			const { json } = await scraper.get('https://postman-echo.com/get', {
+				query: {
+					test: [123,234]
+				}
+			});
+
+			assert.equal(decodeURI(json.url), 'https://postman-echo.com/get?test[0]=123&test[1]=234');
+		}));
+
+		it('should disable indicies if specified as false in options', asyncMocha( async () => {
+			const scraper = Scraper();
+			const { json } = await scraper.get('https://postman-echo.com/get', {
+				query: {
+					test: [123,234]
+				},
+				indicies: false
+			});
+
+			assert.equal(decodeURI(json.url), 'https://postman-echo.com/get?test=123&test=234');
+		}));
 	});
 
 });
