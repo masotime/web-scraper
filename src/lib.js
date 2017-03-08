@@ -131,8 +131,6 @@ function constructOptionsWithJar(uri, { headers, query, body, jar, agentOptions,
 		}
 	}
 
-	console.log(JSON.stringify(options, null, 2));
-
 	return options;
 }
 
