@@ -52,13 +52,20 @@ function Scraper() {
 		});
 	});
 
-	// MAYDO: A download may be the response from a POST?
-	const download = function(uri, { headers, query, agentOptions, filename, indicies } = {}) {
+	const download = function(uri, { post, headers, query, agentOptions, filename, indicies } = {}) {
 
 		return determineFilename(uri, filename).then( downloadpath => {
 			log(`DOWNLOAD ${uri} to ${downloadpath}`);
 
-			const options = constructOptions(uri, { headers, query, agentOptions, indicies });
+			// TODO: This mechanic is awkward and a band-aid. Find a better syntax
+			const method = post && typeof post === 'object' ? 'POST' : 'GET';
+			const preOpts = { method, headers, query, agentOptions, indicies };
+			if (method === 'POST') {
+				preOpts.body = post;
+			}
+
+			// normal operation resumes
+			const options = constructOptions(uri, preOpts);
 			const writeStream = fs.createWriteStream(downloadpath);
 			const req = request(options);
 

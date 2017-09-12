@@ -40,7 +40,7 @@ All invocations return **A+ Promises**. This works well with `async/await` in ES
 2. The second argument is an object that contains additional options regarding the HTTP request you want to make.
    * For `.get`, `{ headers, query }` is supported
    * For `.post`, `{ headers, query, body }` is supported.
-   * For `.download`, `{ headers, query, filename }` is supported.
+   * For `.download`, `{ headers, query, filename, post }` is supported.
 
 e.g. `scraper.get("http://www.google.com/search", { query: { q: 'pineapples' } });`
 
@@ -50,8 +50,9 @@ e.g. `scraper.get("http://www.google.com/search", { query: { q: 'pineapples' } }
 * `query` is also a JavaScript object of the query params you want to send.
 * `body` is a JavaScript object of the FORM params you want to POST (multipart is not currently supported)
 * `filename` is a **string** - the path of where you want the file you are downloading to be saved as, otherwise the original name is used.
+* `post` - this is a special parameter available for download only. It changes the method to POST and should be an object which contains the POST body.
 
-### response 
+### response
 
 Apart from the `download` API, the response will be a "result" object with one or more additional properties
 

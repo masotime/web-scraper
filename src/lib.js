@@ -138,7 +138,7 @@ function determineFilename(uri, filename) {
 	return new Promise((resolve, reject) => {
 		let baseFilename
 		try {
-			baseFilename = /[^\/]+$/.exec(url.parse(uri,true).pathname)[0];
+			baseFilename = /[^/]+$/.exec(url.parse(uri,true).pathname)[0];
 		} catch (err) {
 			debuglog(`WARNING Unable to determine base filename for ${uri}`);
 		}

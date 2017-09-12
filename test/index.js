@@ -1,24 +1,14 @@
-/* global describe, it, afterEach */
+/* global describe, it, afterEach, before, after */
 import assert from 'assert';
-import Scraper from './src/index';
+import Scraper from '../src/index';
 import Promise from 'bluebird';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
 import path from 'path';
+import app from './server';
 
 Promise.promisifyAll(fs);
 const mkdir = Promise.promisify(mkdirp);
-
-function asyncMocha (testFn) {
-	return async done => {
-		try {
-			await testFn();
-			done();
-		} catch(err) {
-			done(err);
-		}
-	}
-}
 
 async function deleteIfExists(...files) {
 	return files.reduce( async (chain, file) => {
@@ -41,29 +31,29 @@ describe('Scraper', () => {
 		{ name: 'download', length: 2}
 	];
 
-	it('should return a scrape object', asyncMocha( async () => {
+	it('should return a scrape object', async () => {
 		const scraper = Scraper();
 		assert.equal(typeof scraper, 'object');
 		apis.forEach(api => {
 			assert.equal(typeof scraper[api.name], 'function');
 		});
-	}));
+	});
 
-	it('should be able to fetch Google\'s home page', asyncMocha( async () => {
+	it('should be able to fetch Google\'s home page', async () => {
 		const scraper = Scraper();
 		const result = await scraper.get('https://www.google.com');
 		assert.ok(result.body);
 		assert.ok(result.body.includes('<title>Google</title>'));
-	}));
+	});
 
-	it('should get a $ representation of Google\'s home page', asyncMocha( async () => {
+	it('should get a $ representation of Google\'s home page', async () => {
 		const scraper = Scraper();
 		const result = await scraper.get('https://www.google.com');
 		assert.ok(result.$);
 		assert.equal(result.$('title').text(), 'Google');
-	}));
+	});
 
-	it('should be able to fetch a JSON response from Google\'s GEOCoding API', asyncMocha( async () => {
+	it('should be able to fetch a JSON response from Google\'s GEOCoding API', async () => {
 		const query = {
 			'address': '1600 Amphitheatre Parkway, Mountain View, CA',
 			'sensor': 'false'
@@ -72,7 +62,7 @@ describe('Scraper', () => {
 		const scraper = Scraper();
 		const result = await scraper.get('http://maps.googleapis.com/maps/api/geocode/json', { query });
 		assert.ok(result.json);
-	}));
+	});
 
 	describe('download', () => {
 		const url = 'https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js';
@@ -80,9 +70,22 @@ describe('Scraper', () => {
 		const baseName = 'swfobject.js';
 		const newName = 'differentswfobject.js';
 
+		// yuck
+		let server;
+		let port;
+
+		before((next) => {
+			server = app.listen(() => {
+				port = server.address().port;
+				next();
+			});
+		});
+
+		after(() => server.close());
+
 		afterEach( async () => await deleteIfExists(baseName, newName, path.join(innerpath, baseName), innerpath));
 
-		it('should be able to download the SWF object javascript library from Google\'s CDN', asyncMocha( async() => {
+		it('should be able to download the SWF object javascript library from Google\'s CDN', async() => {
 			const scraper = Scraper();
 
 			const downloadedName = await scraper.download(url);
@@ -90,9 +93,9 @@ describe('Scraper', () => {
 
 			const contents = await fs.readFileAsync(downloadedName, { encoding: 'utf8' });
 			assert.ok(contents.includes('SWFObject'));
-		}));
+		});
 
-		it('should be able to download to the "inner" folder when that is used as the "target filename"', asyncMocha( async () => {
+		it('should be able to download to the "inner" folder when that is used as the "target filename"', async () => {
 			const scraper = Scraper();
 			await mkdir(innerpath);
 
@@ -101,9 +104,9 @@ describe('Scraper', () => {
 
 			const contents = await fs.readFileAsync(downloadedName, { encoding: 'utf8'});
 			assert.ok(contents.includes('SWFObject'));
-		}));
+		});
 
-		it('should be able to download the SWF object javascript library under a different name', asyncMocha( async () => {
+		it('should be able to download the SWF object javascript library under a different name', async () => {
 			const scraper = Scraper();
 
 			const downloadedName = await scraper.download(url, { filename: newName });
@@ -111,7 +114,44 @@ describe('Scraper', () => {
 
 			const contents = await fs.readFileAsync(downloadedName, { encoding: 'utf8'});
 			assert.ok(contents.includes('SWFObject'));
-		}));
+		});
+
+		it('should be able to download using POST with URL encoded body', async () => {
+			const scraper = Scraper();
+
+			const downloadedName = await scraper.download(`http://127.0.0.1:${port}/download1`, {
+				post: { one: '1', two: '2' },
+				filename: newName
+			});
+			const contents = await fs.readFileAsync(downloadedName, { encoding: 'utf8' });
+			assert.ok(contents.includes('SWFObject'));
+		});
+
+		it('should be able to download using POST with JSON encoded body', async () => {
+			const scraper = Scraper();
+
+			const downloadedName = await scraper.download(`http://127.0.0.1:${port}/download2`, {
+				headers: { 'content-type': 'application/json' },
+				post: { one: '1', two: '2' }, filename: newName }
+			);
+			const contents = await fs.readFileAsync(downloadedName, { encoding: 'utf8' });
+			assert.ok(contents.includes('SWFObject'));
+		});
+
+		it('should NOT be able to download using POST with JSON encoded body if that is not supported by the server', async () => {
+			const scraper = Scraper();
+
+			try {
+				await scraper.download(`http://127.0.0.1:${port}/download1`, {
+					headers: { 'content-type': 'application/json' },
+					post: { one: 1, two: 2 },
+					filename: newName
+				});
+				assert.fail('An error should have been thrown');
+			} catch (err) {
+				assert(err);
+			}
+		});
 
 	});
 
@@ -120,32 +160,32 @@ describe('Scraper', () => {
 		const headers = { Referer: 'nonsense' };
 		const HEADER_DIAGNOSIS_URL = 'https://www.whatismybrowser.com/detect/what-http-headers-is-my-browser-sending';
 
-		it('should be able to add a header that is sent in the HTTP request', asyncMocha( async () => {
+		it('should be able to add a header that is sent in the HTTP request', async () => {
 			const scraper = Scraper();
 			const result = await scraper.get(HEADER_DIAGNOSIS_URL, { headers });
 			assert.ok(result.$('th:contains("REFERER")').next().text().includes('nonsense'));
-		}));
+		});
 
-		it('should be able to download a file with the header sent in the HTTP request', asyncMocha( async () => {
+		it('should be able to download a file with the header sent in the HTTP request', async () => {
 			const scraper = Scraper();
 			const downloadedName = await scraper.download(HEADER_DIAGNOSIS_URL, { filename: tempfile, headers });
 			const contents = await fs.readFileAsync(downloadedName, { encoding: 'utf8' });
 			assert.ok(contents.includes('nonsense'));
-		}));
+		});
 
-		it('should be able to read headers from the response', asyncMocha( async () => {
+		it('should be able to read headers from the response', async () => {
 			const scraper = Scraper();
 			const { headers } = await scraper.get('https://www.instagram.com');
 
 			assert.ok(headers['set-cookie']);
-		}));
+		});
 
-		afterEach( async () => await deleteIfExists(tempfile));
+		afterEach(async () => await deleteIfExists(tempfile));
 
 	});
 
 	describe('querystring support', () => {
-		it('should use indices by default for arrays in query', asyncMocha( async () => {
+		it('should use indices by default for arrays in query', async () => {
 			const scraper = Scraper();
 			const { json } = await scraper.get('https://postman-echo.com/get', {
 				query: {
@@ -154,9 +194,9 @@ describe('Scraper', () => {
 			});
 
 			assert.equal(decodeURI(json.url), 'https://postman-echo.com/get?test[0]=123&test[1]=234');
-		}));
+		});
 
-		it('should disable indicies if specified as false in options', asyncMocha( async () => {
+		it('should disable indicies if specified as false in options', async () => {
 			const scraper = Scraper();
 			const { json } = await scraper.get('https://postman-echo.com/get', {
 				query: {
@@ -166,7 +206,7 @@ describe('Scraper', () => {
 			});
 
 			assert.equal(decodeURI(json.url), 'https://postman-echo.com/get?test=123&test=234');
-		}));
+		});
 	});
 
 });
