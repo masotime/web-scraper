@@ -27,7 +27,7 @@
     "request": "^2.88.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.4.5",
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.1",
     "babel-plugin-istanbul": "^5.1.0",
@@ -40,6 +40,6 @@
     "express": "^4.16.4",
     "mkdirp": "^0.5.1",
     "mocha": "^5.2.0",
-    "nyc": "^13.1.0"
+    "nyc": "^14.1.1"
   }
 }
