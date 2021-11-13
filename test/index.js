@@ -132,8 +132,9 @@ describe('Scraper', () => {
 
 			const downloadedName = await scraper.download(`http://127.0.0.1:${port}/download2`, {
 				headers: { 'content-type': 'application/json' },
-				post: { one: '1', two: '2' }, filename: newName }
-			);
+				post: { one: '1', two: '2' },
+				filename: newName
+			});
 			const contents = await fs.readFileAsync(downloadedName, { encoding: 'utf8' });
 			assert.ok(contents.includes('SWFObject'));
 		});
@@ -163,7 +164,7 @@ describe('Scraper', () => {
 		it('should be able to add a header that is sent in the HTTP request', async () => {
 			const scraper = Scraper();
 			const result = await scraper.get(HEADER_DIAGNOSIS_URL, { headers });
-			assert.ok(result.$('th:contains("REFERER")').next().text().includes('nonsense'));
+			assert.ok(result.$('th:contains("Referer")').next().text().includes('nonsense'));
 		});
 
 		it('should be able to download a file with the header sent in the HTTP request', async () => {
